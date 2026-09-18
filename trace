@@ -1,0 +1,129 @@
+{
+  "type": "span",
+  "begin": "2026-09-18T07:45:41.721Z",
+  "end": "2026-09-18T07:45:44.813Z",
+  "duration": 3092,
+  "name": "DKU_LLM_MESH_COMPLETION_QUERY_STREAMED",
+  "children": [
+    {
+      "type": "span",
+      "begin": "2026-09-18T07:45:41.721Z",
+      "end": "2026-09-18T07:45:41.721Z",
+      "duration": 0,
+      "name": "DKU_LLM_MESH_QUERY_ENFORCEMENT",
+      "children": [],
+      "attributes": {}
+    },
+    {
+      "type": "span",
+      "begin": "2026-09-18T07:45:41.721Z",
+      "end": "2026-09-18T07:45:44.818Z",
+      "duration": 3097,
+      "usageMetadata": {},
+      "name": "DKU_LLM_MESH_LLM_CALL_STREAMED",
+      "children": [
+        {
+          "type": "event",
+          "timestamp": "2026-09-18T07:45:44.810Z",
+          "name": "DKU_LLM_MESH_LLM_CALL_STREAMED_FIRST_CHUNK",
+          "children": [],
+          "attributes": {}
+        },
+        {
+          "type": "event",
+          "timestamp": "2026-09-18T07:45:44.813Z",
+          "name": "DKU_LLM_MESH_LLM_CALL_STREAMED_STREAM_COMPLETE",
+          "children": [],
+          "attributes": {}
+        },
+        {
+          "type": "span",
+          "begin": "2026-09-18T07:45:44.715000Z",
+          "end": "2026-09-18T07:45:44.801000Z",
+          "duration": 86,
+          "name": "DKU_AGENT_CALL",
+          "children": [],
+          "attributes": {
+            "class": "DirectFileArtifactAgent"
+          },
+          "inputs": {},
+          "outputs": {}
+        }
+      ],
+      "attributes": {
+        "llmId": "agent:kDZbtGmU:v1",
+        "llmProvider": "SAVED_MODEL_AGENT",
+        "llmModel": "kDZbtGmU:v1",
+        "completionQuery": {
+          "messages": [
+            {
+              "role": "user",
+              "content": "créer un word sur le sujet de l'IA"
+            }
+          ]
+        },
+        "completionQuerySettings": {
+          "stopSequences": [],
+          "outputTrajectory": true
+        },
+        "completionResponse": {
+          "ok": true,
+          "text": "Voici le document généré sous forme d'artefact :",
+          "finishReason": "unknown",
+          "toolCalls": [],
+          "artifacts": [],
+          "predictedClassProbas": [],
+          "fromCache": false
+        }
+      },
+      "inputs": {
+        "messages": [
+          {
+            "role": "user",
+            "text": "créer un word sur le sujet de l'IA"
+          }
+        ]
+      },
+      "outputs": {
+        "text": "Voici le document généré sous forme d'artefact :"
+      }
+    }
+  ],
+  "attributes": {
+    "llmId": "agent:kDZbtGmU:v1",
+    "llmProvider": "SAVED_MODEL_AGENT",
+    "llmModel": "kDZbtGmU:v1",
+    "completionQuery": {
+      "messages": [
+        {
+          "role": "user",
+          "content": "créer un word sur le sujet de l'IA"
+        }
+      ]
+    },
+    "completionQuerySettings": {
+      "stopSequences": [],
+      "outputTrajectory": true
+    },
+    "completionResponse": {
+      "ok": true,
+      "text": "Voici le document généré sous forme d'artefact :",
+      "finishReason": "unknown",
+      "toolCalls": [],
+      "artifacts": [],
+      "predictedClassProbas": [],
+      "fromCache": false
+    }
+  },
+  "inputs": {
+    "messages": [
+      {
+        "role": "user",
+        "text": "créer un word sur le sujet de l'IA"
+      }
+    ]
+  },
+  "outputs": {
+    "text": "Voici le document généré sous forme d'artefact :"
+  }
+}

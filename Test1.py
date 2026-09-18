@@ -1,85 +1,64 @@
-import io
+import dataiku
+from dataiku.llm.python import BaseLLM
 import base64
-from typing import Any, List, Optional
-import docx
+import io
+from docx import Document
+import pandas as pd
 
-from langchain_core.language_models.llms import BaseLLM
-from langchain_core.outputs import LLMResult, Generation
-from langchain_core.callbacks.manager import CallbackManagerForLLMRun
+OPENAI_CONNECTION_NAME = "openai:LLMaaS-Qwen3-32B:/model/Qwen3-32B-FP8"
 
-DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+class DirectFileArtifactAgent(BaseLLM):
+    def __init__(self):
+        pass
 
-def create_docx_base64(title: str, body: str) -> str:
-    """Génère le binaire Word en mémoire et le convertit en Base64."""
-    doc = docx.Document()
-    doc.add_heading(title, level=1)
-    
-    for paragraph in body.split("\n\n"):
-        p = paragraph.strip()
-        if p:
-            doc.add_paragraph(p)
-            
-    buffer = io.BytesIO()
-    doc.save(buffer)
-    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+    def process(self, query, settings, trace):
+        prompt = query["messages"][-1]["content"]
+        
+        # Déterminer le type de document à créer
+        if any(word in prompt.lower() for word in ["word", "docx", "document"]):
+            artifacts = [self._create_word_artifact(prompt)]
+            response_text = "J'ai créé un document Word que vous pouvez télécharger."
+        else:
+            artifacts = [self._create_word_artifact(prompt)]
+            response_text = "J'ai créé un document Word basé sur votre demande."
+        
+        return {
+            "ok": True,
+            "text": "Voici le document généré sous forme d'artefact :",
+            "finishReason": "STOP",
+            "artifacts": artifacts
+        }
 
-
-class MyLLM(BaseLLM):
-    """
-    Code Agent Dataiku 14.3+ émettant un artefact Word natif.
-    """
-
-    @property
-    def _llm_type(self) -> str:
-        return "dataiku_custom_agent"
-
-    def _generate(
-        self,
-        prompts: List[str],
-        stop: Optional[List[str]] = None,
-        run_manager: Optional[CallbackManagerForLLMRun] = None,
-        **kwargs: Any,
-    ) -> LLMResult:
-        generations = []
-
-        for prompt in prompts:
-            # 1. Génération du document Word en base64
-            doc_name = "Rapport_Analyse.docx"
-            b64_content = create_docx_base64(
-                title="Rapport de Synthèse",
-                body=(
-                    f"Requête initiale de l'utilisateur :\n{prompt}\n\n"
-                    "Ce document a été produit dynamiquement sous forme d'artefact."
-                )
-            )
-
-            # 2. Spécification officielle de l'artefact Dataiku DSS 14.3
-            artifact = {
-                "id": "word-report-artifact",
-                "type": "FILE",
-                "name": doc_name,
-                "description": "Document Word généré par le Code Agent",
-                "parts": [
-                    {
-                        "type": "DATA_INLINE",
-                        "index": 0,
-                        "mimeType": DOCX_MIME,
-                        "dataBase64": b64_content
-                    }
-                ]
-            }
-
-            # 3. Message texte retourné dans le chat
-            chat_text = "Voici votre document Word généré sous forme d'artefact."
-
-            # 4. Transmission à Dataiku via le generation_info
-            gen = Generation(
-                text=chat_text,
-                generation_info={
-                    "artifacts": [artifact],
-                    "finish_reason": "STOP"
+    def _create_word_artifact(self, topic):
+        """Crée un artefact Word avec la structure Dataiku"""
+        
+        # Créer le document Word
+        doc = Document()
+        doc.add_heading(f'Document : {topic}', 0)
+        doc.add_paragraph(f'Ce document a été généré automatiquement sur le sujet : {topic}')
+        doc.add_heading('Contenu Principal', level=1)
+        doc.add_paragraph('Voici le contenu détaillé du document.')
+        
+        # Convertir en bytes
+        doc_buffer = io.BytesIO()
+        doc.save(doc_buffer)
+        doc_buffer.seek(0)
+        doc_bytes = doc_buffer.getvalue()
+        doc_base64 = base64.b64encode(doc_bytes).decode('utf-8')
+        
+        artifact = {
+            "id": "word-report-1",
+            "type": "FILE",              # Indique à l'UI DSS qu'il s'agit d'un fichier téléchargeable
+            "name": "Rapport_Synthese.docx",
+            "description": "Document Word généré par l'agent",
+            "parts": [
+                {
+                    "type": "BINARY",
+                    "index": 0,
+                    # Le contenu binaire encodé en base64 ou la référence interne de stockage
+                    "data": doc_base64
                 }
-            )
-            generations.append([gen])
-
-        return LLMResult(generations=generations)
+            ]
+        }
+        return artifact
+    
